@@ -1,0 +1,62 @@
+一 变量和基础类型
+	1. 字符 '\0' 空字符 后的字符都不会输出，但是长度还是算的
+		char pc[] = { 'a', '\0', 'c', 'd', 'd' };
+		pc[4] = 't';
+		printf("%d", sizeof(pc) / sizeof(*pc));   ---> 5
+		printf("%s", pc);  ----> a 
+
+	2.多行
+		char *pc = "kkkk\n"
+		"dddd\n"
+		"dddd";
+
+		注意反斜杠符号必须是该行的末尾字符，不允许其后面有注释或者空格。同样，后继行行首的任何空格和制表符都是字符串字面值得一部分
+		char *pc = "kkkk \
+		dddd\n\
+
+	3.初始化
+		直接初始化 int a(10);
+		复制初始化 int a = 10;
+		*初始化不是赋值。直接初始化效率更高。
+
+	4.声明和定义
+		可以通过extern 声明而不定义变量（不分配存储空间） extern int i; 使用前必须定义才可以。
+		当extern 声明位于函数内时，不可以含有初始化式，如 void f() {extern int i = 10; } --error
+
+	5.const
+		const 默认为文件的局部变量，需要显示的加上 extern const int i = 10; 在使用的问加上 extern const int i;
+		非const 默认为extern
+
+	6.引用
+		不能定义引用类型的引用
+		非const 引用只能绑定到与该引用同类的对象
+		const 引用可以绑定到不同但相关的类型或者右值
+		int i = 10;
+		const double &ri = i;  ---ok ===>  double temp = i; const double &ri = temp;
+		double &ri = i; --- error
+
+	7.typedef
+		typedef int money;
+
+	8.enum 枚举
+		成员名字唯一，枚举成员值可以不唯一，枚举本身就是 一个常量
+			enum point{
+				one = 1,
+				two = 1,
+			};
+
+			enum po {
+				one = 1,  --error 重定义
+				two = 2,  --error
+			};
+
+	9.预处理
+		#ifndef XXX
+		#define XXX
+		#endif
+
+		#pragma once
+
+
+二 标准库类型
+
