@@ -59,4 +59,461 @@
 
 
 二 标准库类型
+	1.string
+		赋值: 先把原来占用的相关内存释放，然后再分配足够存放新值得内存空间，最后把值复制到新分配的空间。
+		*因此保存的原来的指针有可能失效。
+
+		+：字符串相+， +操作符的左右操作数必须至少有一个是string类型
+
+	2.vector
+		必须是已存在的元素才能使用下标操作，下标操作不会添加元素
+		vector::size_type
+
+	3.bitset
+		bitset<64> b; // <>给出位数
+
+三 数组和指针
+	只有在强调速度时才在类实现的内部使用数组和指针
+	1.数组
+		*数组的元素不可以时 引用类型
+
+		数组下标 类型 ： size_t 
+
+	2.指针
+		指针只能指向同类型的类型。 如一个int指针只能指向int类型对象。因为指针用于间接访问对象，如果指向了其他类型的对象，则在指针上执行的任何操作都可能出错。
+		只要指针指向的是数组，就可以对它进行下标操作
+		int *p = &a[2];
+		int j = p[1]; --> a[2+1]
+		int k = p[-2] -- a[0]
+
+	3.const 指针
+		int *const p = &Z;
+
+	4.指针和typedef
+		typedef string *pstring;
+		const pstring cstr;-->    string *const cstr;
+
+	5. C风格字符串
+		必须保证有足够大的空间，如果空间不够，会发生中断如
+			char* p = "hello";
+			char * p1 = "world";
+			strcpy_s(p, 5, p1);  --> 中断
+
+		函数： strlen 不包含Null的长度
+			   strcpy ...
+
+	6.动态数组
+		不允许创建长度为0的数组，但是可以在结构体中定义
+		int main()
+		{
+			char pc[0]; --- error
+		}
+
+		struct S {
+			char pc[0]; ---ok
+		}
+
+	7.多维数组
+		int a[3][4];
+		int (*p)[4] = a;
+		p = &a[2];
+
+四 表达式
+	1.复合赋值操作
+		=+ -= ...
+		左操作数只计算一次，使用 普通表达式时该操作数计算了2次。
+
+	2.++ -- 
+		后操作返回原来的，未修改的值
+		前操作返回修改后的值
+
+	3. sizeof 
+
+	4.const 对象动态分配和回收
+		const int *pi = new const int();
+		delete pi;
+
+		不能对同一个内存空间delete 2次，可能会破坏存储区
+
+	5.转换
+		static_cast const_cast dynamic_cast
+
+五 语句
+	
+六 函数
+	1.引用形参
+		void fcn(int i) {};
+		void fcn(const int i) {};  -->error:redefines
+		具有const形参或非const形参的函数并无区别，因为虽然const不能改变实参的局部副本，但是实参时以副本的形式传递，因此传给fcn的既可以是const也可以是非
+		const，反正都不会改变实参，所以都是一样的。
+
+		void fcn(int& i) {};
+		void fcn(const int& i) {};
+		如果形参是指针和引用就可以
+
+	2.传递指向指针的引用
+		int *&V1;
+
+	3.数组形参
+		void f(int a[10])
+		void f(int a[]) 
+		都是int* 
+		当编译器检查数组形参关联的实参时，它只会检查实参是否是指针，指针的类型和数组元素的类型是否匹配，而不会检查数组的长度，会忽略长度。
+
+	4.通过引用传递数组
+		void f(int (&a)[10]);
+		会检查形参和实参的类型，大小
+
+	5.内联函数
+		inline 应该定义在.h中，只在.h中声明是不够的
+
+七 关联容器
+	1.pair
+		pair<T1, T2> p;
+		pair<T1, T2> p(v1, v2);
+		make_pair<v1, v2> p;
+		p.first
+		p.second
+
+	2.map
+		*key类型必须定义 < 操作，不能是 <= 
+		map.insert(make_pair())
+		map[] = 
+		map.insert(map<int,int>::value_type(int,int))
+		eg:
+		typedef struct tagStudentinfo {
+		    int      niD;
+		    string   strName;
+		    bool operator < (tagStudentinfo const& _A) const {
+		        //这个函数指定排序策略,按niD排序,如果niD相等的话,按strName排序
+		        if (niD < _A.niD) { return true; }
+		        if (niD == _A.niD) { return strName.compare(_A.strName) < 0; }
+		        return false;
+		    }
+		} Studentinfo, *PStudentinfo;
+
+		map<Studentinfo, int> mapStudent;
+
+		eg:
+		typedef struct tagStudentinfo {
+		    int      niD;
+		    string   strName;
+		} Studentinfo, *PStudentinfo; //学生信息
+
+		class sort {
+		    public:
+		        bool operator() (Studentinfo const &_A, Studentinfo const &_B) const {
+		            if (_A.niD < _B.niD) { return true; }
+		            if(_A.niD == _B.niD) { return _A.strName.compare(_B.strName) < 0; }
+		            return false;
+		        }
+		};
+
+   		map<Studentinfo, int, sort>mapStudent;
+
+
+八 泛型算法
+	1.泛型算法本身从不执行容器操作，只是单独依赖迭代器和迭代器操作。
+
+九 类
+	1.类就是新的类型，新的作用域
+	2.定义类以分号结束。分号是必须的，因为在类定义之后可以接一个对象定义的列表。定义必须以分号结束。
+	3.返回*this
+		A& A::f()
+		{
+			return *this;
+		}
+
+	4.可变数据成员
+		mutable int a;
+		不能为const,在const函数内依然可以修改。
+
+	5.构造函数初始化式
+		初始化式只在函数的定义中而不是声明中指定。
+		不管成员是否在构造函数初始化式列表中显示初始化，类类型的数据成员总是在初始化阶段初始化，后面的时计算阶段，赋值
+
+		初始化const 或引用的类型数据成员的唯一机会是在构造函数初始化式列表中。
+
+	6.默认构造函数
+		如果没有定义，系统会自动合成一个默认构成函数，自己定义了任何形式的构造函数后都不会有系统定义的了。
+
+	7.抑制由构造函数定义的隐式转换
+		explicit A() {};
+		explicit 只能用于类内部的构造函数声明上。
+		如果需要，用户可以显示的使用构造函数。
+
+十 复制控制
+	1.复制构造函数，赋值操作符，析构函数
+		复制构造函数
+			如果没有自己定义，系统提供默认合成 
+			A （const A&）{}
+
+			如果为了防止复制，可以把复制构造函数声明为private,而已可以只声明，不定义，只要不调用时允许的。
+
+		赋值操作符
+			如果没有定义，系统提供默认合成
+			A& operator=(const A&){return *this;}
+			可以重载
+
+		析构函数
+			不管有没有自己定义析构函数，编译器一定会为我们合成一个构造函数。先运行自己定义的，再运行系统合成的。
+
+十一 重载操作符与转换
+	1.内置类型的操作符不能改变，不能为任何内置类型定义额外的新的操作。如数组相加等
+	2.选择成员或非成员实现
+		赋值（=），下标[], 调用（）， -> 必须定义为成员
+
+	3.区别操作符的前缀和后缀形式
+		前缀
+		A& operator++(); 返回对象的引用
+		后缀
+		A operator++(int); 返回旧值，所以返回非引用。int的唯一目的是使后缀函数与前缀函数区别开。
+
+		A a;
+		a.operator++(); 前缀
+		a.operator++(0; 后缀
+
+	4.调用操作符和函数对象
+		struct A{
+			int operator() (int i) {return i;}
+		}
+		A a;
+		a(1);
+		可以重载
+		定义了调用操作符的类，其对象称为函数对象。
+
+		也可以 A(1) 生产临时对象用作函数库算法的函数
+
+	5.标准函数库定义的函数对象 functional头文件
+		greater<Type> 等
+
+	6.转换操作符
+		operator int() {return 10;}
+		不能有返回值，形参表为空
+		eg:
+		A a;
+		a > 1;---->转换为int
+
+十二 面向对象编程
+	1.继承层次的根类一般都要定义虚析构函数	即可。
+	2.用作基类的类必须是已定义的，不能只是声明了。
+	3.如果需要声明（但并不实现）一个派生类，则声明包含类名但不包含派生列表。
+	4.触发动态联编的条件：第一，只有指定为虚函数的成员函数才能进运行时动态绑定，第二，必须通过基类类型的引用或者指针进行函数调用。
+	5.虚函数的默认实参在编译时确定
+	6.如果知道从基类到派生类的转换时安全的，就可以使用static_cast强制转换，否则用dynamic_cast	进行检查。
+	7.构造函数不能定义为虚函数，构造函数是在对象完全构造之前运行的，在构造函数运行的时候，对象的动态类型还不完整。
+	8.如果在构造函数或析构函数中调用虚函数，则运行的是为构造函数或析构函数自身类型定义的版本，因为这个时候对象都是不完整的。
+	9.重载函数
+		如果派生类重定义了重载成员，则通过派生类型只能访问派生类中重定义的那些成员。可以使用using ,指定一个名字，就可以使用继承的定义了。
+	10.名字查找
+	11.纯虚函数
+			在函数形参表后写上=0以指定纯虚函数：
+			int f() = 0;
+			含有或继承一个或者多个纯虚函数的类是抽象基类。
+
+十三 模板与范式编程
+	所谓范式编程就是以独立于任何特定类型的方式编写代码。使用泛型程序时，我们需要体统具体程序实例所操作的类型或值。
+	模板时泛型编程的基础。
+
+	1.函数模板
+		独立于类型的函数，可以产生函数的特定类型版本。 
+		template <class T>
+		void f(T &v1, T& v2) {}
+		模板形参不能为空<>
+
+	2.类模板
+		template <class T>
+		class A 
+		{
+		};
+		使用类模板时必须为模板形参显示指定实参。
+
+	3.非类型模板形参
+		template <class T, size_t N>
+		void array_int(T (&param)[N])
+		{}
+		int x[10];
+		double	y[10];
+		array_int(x);
+		array_int(y);
+		array_int<int,10>(x);
+
+	4.模板函数的声明定义 应该写在同一个文件中。如.h 
+		要进行实例化，编译器必须能够访问定义模板的源代码。
+
+	5.实例化
+		产生模板的特定类型实例的过程称为实例化。
+		模板在使用的时候进行实例化
+		eg:
+			vector<int> vi;
+		模板的每次实例化产生新的类型。
+
+	6.类模板成员函数
+		template <class T> re_type A<T>::f()
+		{}
+
+		只有使用到的时候才进行实例化。
+
+	7.非类型形参的模板实例
+		template <int hi, int wid>
+		class A{
+		}
+		可以带默认值。
+		实参必须是编译时常量表达式， A<1,2> a;
+
+	8.模板特例化
+		对用户而言，调用特例化和使用通用模板实例无区别。
+		eg:
+				template <class T>
+				int compare(const T &v1, const T &v2)()
+
+				特例为const char*
+				template <>
+				int compare<const char*>(const char* const &v1, const char* const &v2)()
+				如果可以推倒也可以这样
+				template <>
+				int compare(const char* const &v1, const char* const &v2);
+
+				其中template<> 必须写，不然就是定义了一个函数
+
+	9.类模板特例化
+		template<>
+		class A<const char*> {
+		public:
+			void f(const char*){}
+		}
+
+		在类特例化外部定义成员时，不需要加上template<>
+		void A<const char*>::f1(const char*)()
+
+		也可以特例化成员而不特例化类
+		template<>
+		void B<const char*>::f(const char*){}
+
+		还可以部分特例化
+		template<class T, class T1>
+		class A{}
+		--->
+		template<class T>
+		class A<T, int>{}
+
+
+十四 工具
+	1.异常处理
+		struct A{}
+		try {
+			throw A();
+		}
+		catch(A a)
+		{
+
+		}
+		catch(...)
+		{
+				//catch-all
+		}
+
+		如果没有catch的函数，那么就会到最后系统catch terminate
+
+	2.命名空间
+		为防止名字冲突提供了更加可控的机制，一个命名空间就是一个作用域。
+
+	3.全局命名空间
+		::member_name 访问全局空间成员
+		namespace kongjian{}  //不能以；结束
+
+	4.为命名的命名空间
+		namespace{} 所在文件的局部变量，不能夸文件
+
+	5.命名空间成员的使用
+		using namespace_XXX::i; //using声明，一次只能引入一个命名空间成员，后面就可以直接 使用 i 
+		using namespace namespace_XXX //using指示，可以使用命名空间的所有成员 i，f  A 等
+
+	6.类成员指针
+		成员指针只应用于类的非static成员，因为它不需要，普通的指针即可。
+		class A 
+		{
+			public:
+				int i;
+				int b;
+				void f(int i) const {}
+
+				typedef void (A::*Action)(int i) const;
+				static Action Menu[]; // 成员指针数组
+		};
+
+		定义
+		int A::* p = &A::i;
+		int A::* p1 = &A::b;
+		使用
+		A a;
+		int i = a.*p;
+		int b = a.*p1;
+		A* p = &a;
+		int i = p->*p;
+
+		成员函数
+		函数形参的类型和数目，包括是否为cons；返回类型；所属类的类型
+		void (A::*pf)(int i) const = &A::f; // 必须加括号，优先级问题； & 必须有，不同于一般的函数指针。
+
+		***使用操作符 .*  ->* ，可以将成员指针绑定到实际对象。只有对象的实例才可以操作。
+		A a;
+		A*  p = &a;
+		(a.*pf)(0);
+		(p->*pf)(0);  // ()必须有，切记
+
+		A::Action A::Menu[] = {
+			&A::f,
+		};
+
+		(this->*Menu[index])(1);
+
+	7.联合：节省空间的类
+		union 是一种特殊的类
+		像任何类一样，一个union定义一个新的类型。
+		union TokenValue {
+			char cval;
+			int ival;
+		};
+		union 后面的 名字可选，不能定义静态，引用，或者类数据成员
+		TokenValue first_token = {'a'};
+		TokenValue *p = new TokenValue;
+
+		通常附加一个单独跟踪union中存的声明类型的值。
+
+		嵌套联合
+			class Token {
+				public:
+					enum TokenKind {INT, CHAR};
+					Tokenind tok;
+					union {
+						char cval;
+						int ival;
+					}val;
+			}
+
+			匿名联合
+			class Token {
+				public:
+					enum TokenKind {INT, CHAR};
+					Tokenind tok;
+					union {
+						char cval;
+						int ival;
+					};
+			}
+			Token token;
+			token.cval = '1';
+			token.ival = 1;
+
+		8.链接指示 ： extern "C" {}
+					 extern "C" void f() {}
+
+
+
+
+
+
+
+
 
